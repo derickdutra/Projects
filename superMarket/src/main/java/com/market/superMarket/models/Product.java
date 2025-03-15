@@ -13,13 +13,13 @@ public class Product {
     private long id;
     private String nome;
     private int quantidade;
-    private boolean preco;
+    private double preco;
 
-    public boolean isPreco() {
+    public double isPreco() {
         return preco;
     }
 
-    public void setPreco(boolean preco) {
+    public void setPreco(double preco) {
         this.preco = preco;
     }
 
