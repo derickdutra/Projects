@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C:\Users\manod\Downloads\superMarket\src\main\java\com\market\superMarket\controller\ProductController.java
 C:\Users\manod\Downloads\superMarket\src\main\java\com\market\superMarket\controller\UserController.java
 C:\Users\manod\Downloads\superMarket\src\main\java\com\market\superMarket\exception\Response.java
@@ -8,3 +9,11 @@ C:\Users\manod\Downloads\superMarket\src\main\java\com\market\superMarket\reposi
 C:\Users\manod\Downloads\superMarket\src\main\java\com\market\superMarket\service\ProductService.java
 C:\Users\manod\Downloads\superMarket\src\main\java\com\market\superMarket\service\UserService.java
 C:\Users\manod\Downloads\superMarket\src\main\java\com\market\superMarket\SuperMarketApplication.java
+=======
+/home/derick/Downloads/SeatleSmart/superMarket/src/main/java/com/market/superMarket/SuperMarketApplication.java
+/home/derick/Downloads/SeatleSmart/superMarket/src/main/java/com/market/superMarket/controller/ProductController.java
+/home/derick/Downloads/SeatleSmart/superMarket/src/main/java/com/market/superMarket/exception/Response.java
+/home/derick/Downloads/SeatleSmart/superMarket/src/main/java/com/market/superMarket/models/Product.java
+/home/derick/Downloads/SeatleSmart/superMarket/src/main/java/com/market/superMarket/repository/ProductRepository.java
+/home/derick/Downloads/SeatleSmart/superMarket/src/main/java/com/market/superMarket/service/ProductService.java
+>>>>>>> f44467b762a00adac988e8ec9325261accd60c48
