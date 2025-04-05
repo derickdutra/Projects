@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -10,6 +10,31 @@
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="css/styles.css" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+        <style>
+            /* Estiliza a lista de sugestões */
+            #suggestions {
+                position: absolute;
+                width: calc(100% - 30px);
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            
+            #suggestions .list-group-item {
+                cursor: pointer;
+                padding: 10px;
+                transition: background 0.3s;
+            }
+            
+            #suggestions .list-group-item:hover {
+                background: #f8f9fa;
+            }
+        </style>
         <script>
             if (localStorage.getItem("logado") !== "true") {
                 window.location.href = "login.html"; // Redireciona para login se não estiver logado
@@ -91,26 +116,19 @@
             </div>
             <div id="layoutSidenav_content">
                 <main>
-                    <div class="container-fluid px-4">
-                        <h1 class="mt-4">Página Inicial</h1>
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">EzTock - Organizando Vidas
-                            </li>
-                        </ol>
-                        </ol>
-
-                        <!-- Botão para abrir o modal -->
+                    <div class="container mt-4">
+                        <!-- Botão para abrir o modal de Adicionar Itens -->
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-primary text-white mb-4">
-                                <div class="card-body">Adicionar itens</div>
+                                <div class="card-body">Adicionar Itens</div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#" data-bs-toggle="modal" data-bs-target="#addItemModal">Adicionar</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Modal -->
+                    
+                        <!-- Modal de Adicionar Itens -->
                         <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -124,63 +142,33 @@
                                                 <label for="itemName" class="form-label">Nome do Item</label>
                                                 <input type="text" class="form-control" id="itemName" required>
                                             </div>
-
-                                    <!-- Tipo de Quantidade -->
-                                    <div class="mb-3">
-                                        <label class="form-label">Tipo</label>
-                                        <select class="form-select" id="itemType" onchange="toggleQuantityType()">
-                                            <option value="unidade">Unidade</option>
-                                            <option value="kilo">Kilo</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- Quantidade -->
-                                    <div class="mb-3">
-                                        <label for="itemQuantity" class="form-label">Quantidade</label>
-                                        <input class="form-control" id="itemQuantity" min="1" step="1" required oninput="validateQuantity()" onkeypress="blockInvalidChars(event)">
-                                    </div>
-
-                                    <script>
-                                        function toggleQuantityType() {
-                                            let itemType = document.getElementById("itemType").value;
-                                            let itemQuantity = document.getElementById("itemQuantity");
-
-                                            // Se o tipo for 'unidade', deve aceitar apenas números inteiros
-                                            if (itemType === "unidade") {
-                                                itemQuantity.setAttribute("step", "1");  // Apenas números inteiros
-                                                itemQuantity.setAttribute("min", "1");   // Mínimo 1 unidade
-                                                itemQuantity.value = Math.floor(itemQuantity.value); // Arredonda caso haja decimal
-                                            } else {
-                                                itemQuantity.setAttribute("step", "0.01"); // Permitir decimais
-                                                itemQuantity.setAttribute("min", "0.01");  // Mínimo 0.01 kg
-                                            }
-                                        }
-
-                                        // Impede entrada de vírgula e ponto no teclado para 'unidade'
-                                        function blockInvalidChars(event) {
-                                            let itemType = document.getElementById("itemType").value;
-                                            if (itemType === "unidade" && (event.key === "." || event.key === ",")) {
-                                                event.preventDefault();
-                                            }
-                                        }
-
-                                        // Remove qualquer decimal se o tipo for unidade
-                                        function validateQuantity() {
-                                            let itemType = document.getElementById("itemType").value;
-                                            let itemQuantity = document.getElementById("itemQuantity");
-
-                                            // Se o tipo for unidade, remove caracteres não numéricos
-                                            if (itemType === "unidade") {
-                                                itemQuantity.value = itemQuantity.value.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
-                                            }
-                                        }
-                                    </script>
-
+                    
+                                            <!-- Tipo de Quantidade -->
                                             <div class="mb-3">
-                                                <label for="itemPrice" class="form-label">Preço</label>
-                                                <input class="form-control" value="R$" id="itemPrice" step="0.01" min="0" required>
+                                                <label class="form-label">Unidade ou Kilo</label>
+                                                <select class="form-select" id="itemType" onchange="toggleQuantityType('itemQuantity')">
+                                                    <option value="unidade">Unidade</option>
+                                                    <option value="kilo">Kilo</option>
+                                                </select>
                                             </div>
-
+                    
+                                            <!-- Quantidade -->
+                                            <div class="mb-3">
+                                                <label id="quantityLabel" for="itemQuantity" class="form-label">Quantidade</label>
+                                                <input type="number" class="form-control" id="itemQuantity" oninput="validateQuantity('itemQuantity')" required>
+                                            </div>
+                    
+                                            <!-- Preços -->
+                                            <div class="mb-3">
+                                                <label for="precoCompra" class="form-label">Preço de Compra (R$)</label>
+                                                <input class="form-control" id="precoCompra" step="0.01" min="0" required>
+                                            </div>
+                    
+                                            <div class="mb-3">
+                                                <label for="precoVenda" class="form-label">Preço de Venda (R$)</label>
+                                                <input class="form-control" id="precoVenda" value="R$"  step="0.01" min="0" required>
+                                            </div>
+                    
                                             <!-- Validade -->
                                             <div class="mb-3">
                                                 <label class="form-label">Possui validade?</label>
@@ -189,164 +177,370 @@
                                                     <option value="sim">Sim</option>
                                                 </select>
                                             </div>
-
-                                            <!-- Data de Validade (Oculto por padrão) -->
+                    
                                             <div class="mb-3" id="validityDateField" style="display: none;">
                                                 <label for="validityDate" class="form-label">Data de Validade</label>
                                                 <input type="date" class="form-control" id="validityDate">
                                             </div>
-
+                    
                                             <button type="submit" class="btn btn-primary">Salvar</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-warning text-white mb-4">
-                                    <div class="card-body">Vendas diárias</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">Adicionar</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    
+                        
+                        <!-- Botão para abrir o modal de Vendas Diárias -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card bg-success text-white mb-4">
+                            <div class="card-body">Vendas Diárias</div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <a class="small text-white stretched-link" href="#" data-bs-toggle="modal" data-bs-target="#dailySalesModal">Adicionar</a>
+                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal fade" id="dailySalesModal" tabindex="-1" aria-labelledby="dailySalesModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="dailySalesModalLabel">Vendas Diárias</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <button type="button" class="btn btn-primary" id="showFormButton">+</button>
+                                    <div id="formContainer" style="display: none;">
+                                        <!-- Grupos de campos -->
+                                        <div class="item-sold-group">
+                                            <label for="itemNameVendido">Item Vendido</label>
+                                            <input type="text" id="search" autocomplete="off" class="form-control mb-3">
+                                            <div id="suggestions" class="list-group"></div>
+                                            <label for="quantidadeVendida">Quantidade Vendida</label>
+                                            <input class="form-control mb-3" id="quantidadeVendida" oninput="validateQuantity('quantidadeVendida')" required>
+                                        </div>
+                                        <button type="button" class="btn btn-secondary" id="addItemButton">Adicionar +</button>
+                                        <button type="button" class="btn btn-danger" id="removeLastItemButton">Remover Último</button>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-success text-white mb-4">
-                                    <div class="card-body">Success Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-danger text-white mb-4">
-                                    <div class="card-body">Danger Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" id="saveSaleButton">Salvar Venda</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-bar me-1"></i>
-                                        Bar Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                        </div>
-
+                    </div>
+                    
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const showFormButton = document.getElementById("showFormButton");
+                            const formContainer = document.getElementById("formContainer");
+                            const addItemButton = document.getElementById("addItemButton");
+                            const removeLastItemButton = document.getElementById("removeLastItemButton");
+                            const searchInput = document.getElementById("search");
+                            const suggestionsBox = document.getElementById("suggestions");
+                            const quantidadeVendidaInput = document.getElementById("quantidadeVendida");
+                            const saveSaleButton = document.getElementById("saveSaleButton");
+                    
+                            // Exibir o formulário ao clicar no botão inicial "+"
+                            showFormButton.addEventListener("click", function () {
+                                formContainer.style.display = "block";
+                                showFormButton.style.display = "none";
+                            });
+                    
+                            // Adicionar novos campos para itens vendidos
+                            addItemButton.addEventListener("click", function () {
+                                const newItemGroup = document.createElement("div");
+                                newItemGroup.classList.add("item-sold-group");
+                                newItemGroup.innerHTML = `
+                                    <label>Item Vendido</label>
+                                    <input type="text" autocomplete="off" class="form-control mb-3">
+                                    <div class="list-group"></div>
+                                    <label>Quantidade Vendida</label>
+                                    <input class="form-control mb-3" oninput="validateQuantity('quantidadeVendida')" required>
+                                `;
+                                formContainer.insertBefore(newItemGroup, addItemButton);
+                            });
+                    
+                            // Remover o último grupo de campos
+                            removeLastItemButton.addEventListener("click", function () {
+                                const itemGroups = document.querySelectorAll(".item-sold-group");
+                                if (itemGroups.length > 1) {
+                                    const lastItemGroup = itemGroups[itemGroups.length - 1];
+                                    lastItemGroup.remove();
+                                }
+                            });
+                    
+                            // Função para buscar itens na tabela
+                            function getTableItems() {
+                                const items = [];
+                                const tableRows = document.querySelectorAll("#mercadoriasTableBody tr");
+                                tableRows.forEach(row => {
+                                    const itemName = row.cells[0].textContent.trim();
+                                    if (itemName) {
+                                        items.push(itemName);
+                                    }
+                                });
+                                return items;
+                            }
+                    
+                            // Mostrar sugestões de itens
+                            function showSuggestions(query) {
+                                suggestionsBox.innerHTML = "";
+                                if (!query) return;
+                    
+                                const items = getTableItems();
+                                const filteredItems = items.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+                    
+                                filteredItems.forEach(item => {
+                                    const suggestionItem = document.createElement("div");
+                                    suggestionItem.classList.add("list-group-item", "list-group-item-action");
+                                    suggestionItem.textContent = item;
+                                    suggestionItem.addEventListener("click", function () {
+                                        searchInput.value = item;
+                                        suggestionsBox.innerHTML = "";
+                                    });
+                                    suggestionsBox.appendChild(suggestionItem);
+                                });
+                            }
+                    
+                            searchInput.addEventListener("input", function () {
+                                showSuggestions(this.value);
+                            });
+                    
+                            document.addEventListener("click", function (e) {
+                                if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                                    suggestionsBox.innerHTML = "";
+                                }
+                            });
+                    
+                            // Evento de salvar venda
+                            saveSaleButton.addEventListener("click", function () {
+                        const itemVendido = searchInput.value.trim();
+                        const quantidadeVendida = parseFloat(quantidadeVendidaInput.value);
+                    
+                        if (!itemVendido || isNaN(quantidadeVendida) || quantidadeVendida <= 0) {
+                            alert("Selecione um item válido e insira uma quantidade correta.");
+                            return;
+                        }
+                    
+                        let itemEncontrado = false;
+                        const tableRows = document.querySelectorAll("#mercadoriasTableBody tr");
+                    
+                        tableRows.forEach(row => {
+                            const itemNameCell = row.cells[0];
+                            const quantidadeCell = row.cells[2];
+                            const precoCell = row.cells[4];
+                            const lucroCell = row.cells[5];
+                            const precoTotalCell = row.cells[6];
+                            const lucroTotalCell = row.cells[7];
+                    
+                            if (itemNameCell.textContent.trim() === itemVendido) {
+                                let quantidadeAtual = parseFloat(quantidadeCell.textContent);
+                                let precoVenda = parseFloat(precoCell.textContent.replace("R$", "").trim());
+                                let lucroUnitario = parseFloat(lucroCell.textContent.replace("R$", "").trim());
+                    
+                                if (quantidadeVendida > quantidadeAtual) {
+                                    alert("Erro: Quantidade vendida maior que a disponível!");
+                                    return;
+                                }
+                    
+                                quantidadeAtual -= quantidadeVendida;
+                                quantidadeCell.textContent = quantidadeAtual;
+                    
+                                // Atualiza o preço total e o lucro total
+                                let novoPrecoTotal = quantidadeAtual * precoVenda;
+                                let novoLucroTotal = quantidadeAtual * lucroUnitario;
+                    
+                                precoTotalCell.textContent = `R$ ${novoPrecoTotal.toFixed(2)}`;
+                                lucroTotalCell.textContent = `R$ ${novoLucroTotal.toFixed(2)}`;
+                    
+                                itemEncontrado = true;
+                            }
+                        });
+                    
+                        if (!itemEncontrado) {
+                            alert("Item não encontrado na tabela.");
+                            return;
+                        }
+                    
+                        // Fechar o modal corretamente
+                        let modalElement = document.getElementById('dailySalesModal');
+                        let modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    
+                        // Limpar os campos
+                        searchInput.value = "";
+                        quantidadeVendidaInput.value = "";
+                    });
+                    
+                        });
+                    </script>
+                    
+                    
                         <!-- Tabela para exibir os itens -->
                         <table id="mercadoriasTable" class="table">
                             <thead>
                                 <tr>
                                     <th scope="col">Nome do Item</th>
-                                    <th scope="col">Unidade ou Kilo</th>
+                                    <th scope="col">Unidade/Kilo</th>
                                     <th scope="col">Quantidade</th>
-                                    <th scope="col">Preço</th>
+                                    <th scope="col">Preço de Compra</th>
+                                    <th scope="col">Preço de Venda</th>
+                                    <th scope="col">Lucro</th>
+                                    <th scope="col">Preço total</th>
+                                    <th scope="col">Lucro total</th>
                                     <th scope="col">Validade</th>
                                 </tr>
                             </thead>
                             <tbody id="mercadoriasTableBody">
-                                <!-- Os itens serão inseridos aqui -->
                             </tbody>
                         </table>
-
                     </div>
-                </main>
-            </div>
-        </div>
-
-        <script>
-            // Função para exibir ou ocultar o campo de validade
-            function toggleValidityDate() {
-                var hasValidity = document.getElementById("hasValidity").value;
-                var validityDateField = document.getElementById("validityDateField");
-        
-                if (hasValidity === "sim") {
-                    validityDateField.style.display = "block";  // Exibe o campo de validade
-                } else {
-                    validityDateField.style.display = "none";  // Oculta o campo de validade
-                }
-            }
-        
-            // Função para formatar a data no formato dd/mm/yyyy
-            function formatDate(dateString) {
-                var date = new Date(dateString);
-                var day = String(date.getDate()).padStart(2, '0');
-                var month = String(date.getMonth() + 1).padStart(2, '0'); // Meses começam do 0
-                var year = date.getFullYear();
-                return day + '/' + month + '/' + year;
-            }
-        
-            document.getElementById("itemForm").addEventListener("submit", function(event) {
-                event.preventDefault();
-        
-                var itemName = document.getElementById("itemName").value;
-                var itemDescription = document.getElementById("itemType").value;
-                var itemQuantity = document.getElementById("itemQuantity").value;
-                var itemPrice = document.getElementById("itemPrice").value;
-                var hasValidity = document.getElementById("hasValidity").value;
-        
-                // Verifica se os campos obrigatórios estão preenchidos
-                if (itemName.trim() === "" || itemDescription.trim() === "" || itemPrice.trim() === "" || itemQuantity.trim() === "") {
-                    alert("Todos os campos devem ser preenchidos!");
-                    return;
-                }
-        
-                // Se o item tiver validade, pega a data de validade, senão coloca 'xx/xx/xxxxx'
-                var validityDate = hasValidity === "sim" ? document.getElementById("validityDate").value : "xx/xx/xxxxx";
-        
-                // Se a data de validade for fornecida, formata a data
-                if (validityDate !== "xx/xx/xxxx") {
-                    validityDate = formatDate(validityDate);
-                }
-        
-                // Pega a referência da tabela
-                var tableBody = document.getElementById("mercadoriasTableBody");
-        
-                // Cria uma nova linha
-                var newRow = tableBody.insertRow();
-        
-                // Nome do item
-                var cellName = newRow.insertCell(0);
-                cellName.textContent = itemName;
-        
-                // Descrição do item (tipo)
-                var cellDescription = newRow.insertCell(1);
-                cellDescription.textContent = itemDescription;
-        
-                // Quantidade
-                var cellQuantity = newRow.insertCell(2);
-                cellQuantity.textContent = itemQuantity;
-        
-                // Preço
-                var cellPrice = newRow.insertCell(3);
-                cellPrice.textContent = itemPrice;
-        
-                // Validade
-                var cellValidity = newRow.insertCell(4);
-                cellValidity.textContent = validityDate;
-        
-                // Limpa os campos do formulário
-                document.getElementById("itemName").value = "";
-                document.getElementById("itemQuantity").value = "";
-                document.getElementById("itemPrice").value = "";
-                document.getElementById("hasValidity").value = "nao";
-                document.getElementById("validityDate").value = "";  // Limpa a data de validade
-        
-                // Fecha o modal
-                var modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
-                modal.hide();
-            });
-        </script>
+                    
+                    <script>
+                        // Função para exibir ou ocultar o campo de validade
+                        function toggleValidityDate() {
+                            const hasValidity = document.getElementById("hasValidity").value;
+                            const validityDateField = document.getElementById("validityDateField");
+                            validityDateField.style.display = hasValidity === "sim" ? "block" : "none";
+                        }
+                    
+                        // Função para validar a quantidade
+                        function validateQuantity(quantityId) {
+                            const itemType = document.getElementById("itemType").value;
+                            const itemQuantity = document.getElementById(quantityId);
+                    
+                            if (itemType === "unidade") {
+                                itemQuantity.setAttribute("step", "1");
+                                itemQuantity.value = itemQuantity.value.replace(/[^0-9]/g, '');
+                            } else {
+                                itemQuantity.setAttribute("step", "0.01");
+                            }
+                        }
+                    
+                        // Formatar data
+                        function formatDate(dateString) {
+                            const date = new Date(dateString);
+                            return date.toLocaleDateString('pt-BR');
+                        }
+                    
+                        // Adicionar itens à tabela
+                        document.getElementById("itemForm").addEventListener("submit", function(event) {
+                            event.preventDefault();
+                    
+                            const itemName = document.getElementById("itemName").value;
+                            const itemType = document.getElementById("itemType").value;
+                            let itemQuantity = parseFloat(document.getElementById("itemQuantity").value);
+                            const precoCompra = parseFloat(document.getElementById("precoCompra").value.replace("R$", "").trim());
+                            const precoVenda = parseFloat(document.getElementById("precoVenda").value.replace("R$", "").trim());
+                            const hasValidity = document.getElementById("hasValidity").value;
+                    
+                            // Valida os preços e quantidade
+                            if (isNaN(precoCompra) || isNaN(precoVenda) || isNaN(itemQuantity) || itemQuantity <= 0) {
+                                alert("Por favor, insira valores válidos!");
+                                return;
+                            }
+                    
+                            // Calcula o lucro unitário
+                            const lucro = precoVenda - precoCompra;
+                            // Calcula o preço total
+                            const precoTotal = itemQuantity * precoVenda;
+                            // Calcula o lucro total
+                            const lucroTotal = itemQuantity * lucro;
+                    
+                            // Validade
+                            const validityDate = hasValidity === "sim" ? formatDate(document.getElementById("validityDate").value) : "Sem validade";
+                    
+                            // Pega a referência da tabela
+                            const tableBody = document.getElementById("mercadoriasTableBody");
+                    
+                            // Cria uma nova linha
+                            const newRow = tableBody.insertRow();
+                    
+                            newRow.innerHTML = `
+                                <td>${itemName}</td>
+                                <td>${itemType}</td>
+                                <td class="quantidade">${itemQuantity}</td>
+                                <td>R$ ${precoCompra.toFixed(2)}</td>
+                                <td>R$ ${precoVenda.toFixed(2)}</td>
+                                <td>R$ ${lucro.toFixed(2)}</td>
+                                <td class="precoTotal">R$ ${precoTotal.toFixed(2)}</td>
+                                <td class="lucro-total" data-lucro-por-unidade="5.00">100.00</td>
+                                <td>${validityDate}</td>
+                            `;
+                    
+                            // Limpa o formulário
+                            document.getElementById("itemForm").reset();
+                            document.getElementById("validityDateField").style.display = "none";
+                    
+                            // Fecha o modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
+                            modal.hide();
+                        });
+                    
+                        // Gerenciar vendas diárias
+                        document.querySelector("#dailySalesModal .btn-primary").addEventListener("click", function () {
+                            const searchInput = document.getElementById("search");
+                            const quantidadeVendidaInput = document.getElementById("quantidadeVendida");
+                    
+                            const itemVendido = searchInput.value.trim();
+                            const quantidadeVendida = parseFloat(quantidadeVendidaInput.value);
+                    
+                            if (isNaN(quantidadeVendida) || quantidadeVendida <= 0) {
+                                alert("Selecione um item válido e insira uma quantidade correta.");
+                                return;
+                            }
+                    
+                            // Procurar o item na tabela
+                            const tableRows = document.querySelectorAll("#mercadoriasTableBody tr");
+                            let itemEncontrado = false;
+                    
+                            tableRows.forEach(row => {
+                                const itemNameCell = row.cells[0];
+                                const quantidadeCell = row.querySelector(".quantidade");
+                                const precoTotalCell = row.querySelector(".precoTotal");
+                                const lucroTotalCell = row.querySelector(".lucroTotal");
+                                const precoVenda = parseFloat(row.cells[4].textContent.replace("R$", "").trim());
+                                const lucroUnitario = parseFloat(row.cells[5].textContent.replace("R$", "").trim());
+                    
+                                if (itemNameCell.textContent.trim() === itemVendido) {
+                                    let quantidadeAtual = parseFloat(quantidadeCell.textContent);
+                    
+                                    if (quantidadeVendida > quantidadeAtual) {
+                                        alert("Erro: Quantidade vendida maior que a disponível!");
+                                        return;
+                                    }
+                    
+                                    quantidadeAtual -= quantidadeVendida;
+                                    quantidadeCell.textContent = quantidadeAtual;
+                    
+                                    // Atualiza o preço total e o lucro total
+                                    const novoPrecoTotal = quantidadeAtual * precoVenda;
+                                    const novoLucroTotal = quantidadeAtual * lucroUnitario;
+                    
+                                    precoTotalCell.textContent = `R$ ${novoPrecoTotal.toFixed(2)}`;
+                                    lucroTotalCell.textContent = `R$ ${novoLucroTotal.toFixed(2)}`;
+                    
+                                    itemEncontrado = true;
+                                }
+                            });
+                    
+                            if (!itemEncontrado) {
+                                alert("Item não encontrado na tabela.");
+                            }
+                    
+                            // Fechar modal após venda
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('dailySalesModal'));
+                            modal.hide();
+                    
+                            // Limpar campos
+                            searchInput.value = "";
+                            quantidadeVendidaInput.value = "";
+                        });
+                    </script>
               
 
         <script>
